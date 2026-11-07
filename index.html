@@ -100,7 +100,7 @@
             <img id="art" class="album-art" src="" alt="Art">
             <div class="track-info">
                 <p id="title" class="track-title">Menunggu Musik...</p>
-                <p id="artist" class="track-artist">IndoFinity Bridge</p>
+                <p id="artist" class="track-artist">Menghubungkan...</p>
             </div>
         </div>
 
@@ -111,16 +111,41 @@
     </div>
 
     <script>
-        // Menggunakan port WebSocket jembatan lokal Anda (8766)
+        // Menggunakan koneksi HTTP Fetch secara berkala untuk menghindari blokir Mixed Content HTTPS -> HTTP/WS
+        const apiUri = "http://127.0.0.1:8766/data"; // Sesuaikan endpoint data di Python jika ada, atau gunakan WebSocket lokal khusus
+
+        function fetchData() {
+            fetch("http://127.0.0.1:8766")
+                .then(response => response.json())
+                .then(data => {
+                    updateWidget(data);
+                })
+                .catch(err => {
+                    // Jika endpoint HTTP tidak aktif, coba fallback ke WebSocket atau tampilkan status
+                    document.getElementById("artist").textContent = "Menunggu jembatan lokal...";
+                });
+        }
+
+        // Alternatif jika jembatan Anda murni WebSocket, kita gunakan WebSocket dengan penanganan aman
         const wsUri = "ws://127.0.0.1:8766";
         let websocket;
 
         function initWebSocket() {
             websocket = new WebSocket(wsUri);
-            websocket.onopen = function(evt) { console.log("CONNECTED"); };
-            websocket.onclose = function(evt) { 
-                setTimeout(initWebSocket, 2000); 
+            
+            websocket.onopen = function(evt) { 
+                document.getElementById("artist").textContent = "Terhubung ke Jembatan";
             };
+            
+            websocket.onclose = function(evt) { 
+                document.getElementById("artist").textContent = "Terputus, mencoba menyambung...";
+                setTimeout(initWebSocket, 3000); 
+            };
+            
+            websocket.onerror = function(err) {
+                document.getElementById("artist").textContent = "Gagal terhubung (Cek Port/CORS)";
+            };
+
             websocket.onmessage = function(evt) {
                 try {
                     const data = JSON.parse(evt.data);
@@ -132,18 +157,20 @@
         }
 
         function updateWidget(data) {
-            if (data.player) {
-                document.getElementById("title").textContent = data.player.trackTitle || "Tidak diketahui";
-                document.getElementById("artist").textContent = data.player.trackArtist || "Artis tidak diketahui";
+            if (data.player || data.title) {
+                const track = data.player || data;
+                document.getElementById("title").textContent = track.trackTitle || track.title || "Tidak diketahui";
+                document.getElementById("artist").textContent = track.trackArtist || track.artist || "Artis tidak diketahui";
                 
-                if (data.player.trackCoverUrl) {
-                    document.getElementById("art").src = data.player.trackCoverUrl;
+                const cover = track.trackCoverUrl || track.coverUrl;
+                if (cover) {
+                    document.getElementById("art").src = cover;
                 }
             }
 
             if (data.queue && data.queue.length > 0) {
                 const nextSong = data.queue[0];
-                document.getElementById("upnext").textContent = `${nextSong.title} - ${nextSong.artist}`;
+                document.getElementById("upnext").textContent = `${nextSong.title || nextSong.trackTitle} - ${nextSong.artist || nextSong.trackArtist}`;
             } else {
                 document.getElementById("upnext").textContent = "Tidak ada antrean berikutnya";
             }
