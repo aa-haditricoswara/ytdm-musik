@@ -21,7 +21,7 @@
             width: 100%;
             max-width: 450px;
             background: rgba(30, 30, 30, 0.85);
-            border: 2px solid rgba(254, 44, 85, 0.8); /* Tema khas TikTok / YTMD */
+            border: 2px solid rgba(254, 44, 85, 0.8);
             border-radius: 16px;
             padding: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
@@ -111,15 +111,15 @@
     </div>
 
     <script>
-        // Sesuaikan dengan port/endpoint WebSocket IndoFinity Anda jika diperlukan
-        const wsUri = "ws://127.0.0.1:9863/api/v1"; // atau endpoint bawaan IndoFinity
+        // Menggunakan port WebSocket jembatan lokal Anda (8766)
+        const wsUri = "ws://127.0.0.1:8766";
         let websocket;
 
         function initWebSocket() {
             websocket = new WebSocket(wsUri);
             websocket.onopen = function(evt) { console.log("CONNECTED"); };
             websocket.onclose = function(evt) { 
-                setTimeout(initWebSocket, 2000); // Coba reconnect otomatis jika putus
+                setTimeout(initWebSocket, 2000); 
             };
             websocket.onmessage = function(evt) {
                 try {
@@ -132,7 +132,6 @@
         }
 
         function updateWidget(data) {
-            // Menyesuaikan struktur data dari YouTube Music / IndoFinity
             if (data.player) {
                 document.getElementById("title").textContent = data.player.trackTitle || "Tidak diketahui";
                 document.getElementById("artist").textContent = data.player.trackArtist || "Artis tidak diketahui";
