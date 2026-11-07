@@ -99,8 +99,8 @@
         <div class="now-playing">
             <img id="art" class="album-art" src="" alt="Art">
             <div class="track-info">
-                <p id="title" class="track-title">Menunggu Musik...</p>
-                <p id="artist" class="track-artist">Menghubungkan...</p>
+                <p id="title" class="track-title">Memuat Musik...</p>
+                <p id="artist" class="track-artist">Menunggu Pemutar...</p>
             </div>
         </div>
 
@@ -111,72 +111,66 @@
     </div>
 
     <script>
-        // Menggunakan koneksi HTTP Fetch secara berkala untuk menghindari blokir Mixed Content HTTPS -> HTTP/WS
-        const apiUri = "http://127.0.0.1:8766/data"; // Sesuaikan endpoint data di Python jika ada, atau gunakan WebSocket lokal khusus
-
-        function fetchData() {
-            fetch("http://127.0.0.1:8766")
-                .then(response => response.json())
-                .then(data => {
-                    updateWidget(data);
-                })
-                .catch(err => {
-                    // Jika endpoint HTTP tidak aktif, coba fallback ke WebSocket atau tampilkan status
-                    document.getElementById("artist").textContent = "Menunggu jembatan lokal...";
-                });
-        }
-
-        // Alternatif jika jembatan Anda murni WebSocket, kita gunakan WebSocket dengan penanganan aman
         const wsUri = "ws://127.0.0.1:8766";
         let websocket;
+        let isConnected = false;
 
-        function initWebSocket() {
-            websocket = new WebSocket(wsUri);
-            
-            websocket.onopen = function(evt) { 
-                document.getElementById("artist").textContent = "Terhubung ke Jembatan";
-            };
-            
-            websocket.onclose = function(evt) { 
-                document.getElementById("artist").textContent = "Terputus, mencoba menyambung...";
-                setTimeout(initWebSocket, 3000); 
-            };
-            
-            websocket.onerror = function(err) {
-                document.getElementById("artist").textContent = "Gagal terhubung (Cek Port/CORS)";
-            };
+        function connect() {
+            try {
+                websocket = new WebSocket(wsUri);
+                
+                websocket.onopen = function() {
+                    isConnected = true;
+                    document.getElementById("artist").textContent = "Terhubung ke Jembatan";
+                };
 
-            websocket.onmessage = function(evt) {
-                try {
-                    const data = JSON.parse(evt.data);
-                    updateWidget(data);
-                } catch (e) {
-                    console.error("Gagal parse data:", e);
-                }
-            };
+                websocket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        updateWidget(data);
+                    } catch (e) {
+                        console.error("Format data salah:", e);
+                    }
+                };
+
+                websocket.onclose = function() {
+                    isConnected = false;
+                    document.getElementById("artist").textContent = "Menghubungkan ulang...";
+                    setTimeout(connect, 3000);
+                };
+
+                websocket.onerror = function() {
+                    isConnected = false;
+                };
+            } catch (err) {
+                setTimeout(connect, 3000);
+            }
         }
 
         function updateWidget(data) {
-            if (data.player || data.title) {
-                const track = data.player || data;
-                document.getElementById("title").textContent = track.trackTitle || track.title || "Tidak diketahui";
-                document.getElementById("artist").textContent = track.trackArtist || track.artist || "Artis tidak diketahui";
-                
-                const cover = track.trackCoverUrl || track.coverUrl;
-                if (cover) {
-                    document.getElementById("art").src = cover;
-                }
+            // Menangkap berbagai kemungkinan struktur data dari Python
+            const track = data.player || data.current || data;
+            
+            const title = track.trackTitle || track.title || track.song || "Tidak diketahui";
+            const artist = track.trackArtist || track.artist || "Artis tidak diketahui";
+            const cover = track.trackCoverUrl || track.coverUrl || track.image || "";
+
+            document.getElementById("title").textContent = title;
+            document.getElementById("artist").textContent = artist;
+            if (cover) {
+                document.getElementById("art").src = cover;
             }
 
-            if (data.queue && data.queue.length > 0) {
-                const nextSong = data.queue[0];
-                document.getElementById("upnext").textContent = `${nextSong.title || nextSong.trackTitle} - ${nextSong.artist || nextSong.trackArtist}`;
+            const queue = data.queue || data.playlist;
+            if (queue && queue.length > 0) {
+                const next = queue[0];
+                document.getElementById("upnext").textContent = `${next.title || next.trackTitle || ""} - ${next.artist || next.trackArtist || ""}`;
             } else {
                 document.getElementById("upnext").textContent = "Tidak ada antrean berikutnya";
             }
         }
 
-        window.addEventListener("load", initWebSocket, false);
+        connect();
     </script>
 
 </body>
