@@ -1,127 +1,780 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Hadi YTMD Live Widget</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 10px;
-            background: transparent;
-            font-family: "Segoe UI", Arial, sans-serif;
-            color: #ffffff;
-            overflow: hidden;
-        }
-        .music-card {
-            width: 100%;
-            max-width: 450px;
-            background: rgba(30, 30, 30, 0.9);
-            border: 2px solid rgba(254, 44, 85, 0.9);
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-        }
-        .header-title {
-            font-size: 12px;
-            font-weight: bold;
-            color: #25f4ee;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-        .now-playing {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 10px;
-        }
-        .album-art {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: #444;
-        }
-        .track-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin: 0 0 4px 0;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 320px;
-        }
-        .track-artist {
-            font-size: 12px;
-            color: #bbb;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 320px;
-        }
-        .up-next {
-            font-size: 11px;
-            color: #ffaa00;
-        }
-        .up-next-track {
-            font-size: 12px;
-            color: #ddd;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: file;
-            text-overflow: ellipsis;
-            max-width: 400px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+@property --panel-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --song-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  padding: 3px;
+  color: #fff;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* PANEL UTAMA - UKURAN TETAP */
+
+.panel {
+  position: relative;
+  isolation: isolate;
+
+  width: 210px;
+  height: 350px;
+  min-width: 210px;
+  max-width: 210px;
+  min-height: 350px;
+  max-height: 350px;
+
+  overflow: hidden;
+
+  background: rgba(16, 15, 13, .97);
+  border: 1px solid rgba(233,195,106,.65);
+  border-radius: 12px;
+
+  padding: 7px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  box-shadow:
+    0 0 7px rgba(233,195,106,.3),
+    0 0 16px rgba(233,195,106,.15),
+    0 4px 15px rgba(0,0,0,.5);
+
+  animation: frameGlow 4.5s ease-in-out infinite;
+}
+
+/* CAHAYA PANEL */
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+
+  background: conic-gradient(
+    from var(--panel-angle),
+    transparent 0deg,
+    rgba(184,134,50,.2) 35deg,
+    #b88632 65deg,
+    #fff2bd 85deg,
+    #ffffff 95deg,
+    #e9c36a 110deg,
+    rgba(184,134,50,.2) 145deg,
+    transparent 180deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+  z-index: 5;
+
+  animation: panelOrbit 4.2s linear infinite;
+}
+
+/* KILATAN CAHAYA */
+
+.lightning {
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  width: 65%;
+  left: -90%;
+
+  pointer-events: none;
+  z-index: 0;
+
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255,255,255,0) 32%,
+    rgba(255,229,166,.08) 42%,
+    rgba(255,255,255,.30) 48%,
+    rgba(255,239,197,.15) 52%,
+    rgba(255,255,255,0) 63%,
+    transparent 100%
+  );
+
+  filter: blur(2px);
+  opacity: 0;
+
+  animation: lightningSweep 6.8s ease-in-out infinite;
+}
+
+.lightning.one {
+  animation-delay: 0s;
+}
+
+.lightning.two {
+  animation-delay: .65s;
+}
+
+.lightning.three {
+  animation-delay: 1.3s;
+}
+
+@keyframes lightningSweep {
+  0%, 5% {
+    left: -90%;
+    opacity: 0;
+  }
+
+  12% {
+    opacity: .9;
+  }
+
+  35% {
+    opacity: .65;
+  }
+
+  48% {
+    left: 120%;
+    opacity: 0;
+  }
+
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+
+@keyframes panelOrbit {
+  from { --panel-angle: 0deg; }
+  to { --panel-angle: 360deg; }
+}
+
+@keyframes frameGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 5px rgba(233,195,106,.30),
+      0 0 13px rgba(233,195,106,.12),
+      0 4px 15px rgba(0,0,0,.5);
+  }
+
+  45% {
+    box-shadow:
+      0 0 9px rgba(255,231,165,.65),
+      0 0 22px rgba(233,195,106,.30),
+      0 0 32px rgba(255,255,255,.08),
+      0 4px 15px rgba(0,0,0,.5);
+  }
+
+  55% {
+    box-shadow:
+      0 0 6px rgba(255,255,255,.45),
+      0 0 17px rgba(233,195,106,.25),
+      0 4px 15px rgba(0,0,0,.5);
+  }
+}
+
+/* ISI PANEL */
+
+.panel > .now,
+.panel > .upnext {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* NOW PLAYING - UKURAN TETAP */
+
+.now {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  width: 100%;
+  height: 62px;
+  min-height: 62px;
+  max-height: 62px;
+
+  overflow: hidden;
+
+  padding: 2px 2px 7px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+.cover {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  flex-shrink: 0;
+
+  border-radius: 9px;
+  object-fit: cover;
+  background: #333;
+
+  box-shadow:
+    0 0 5px rgba(233,195,106,.25),
+    0 2px 8px rgba(0,0,0,.5);
+}
+
+.track-info {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: left;
+}
+
+.now-label {
+  color: #e9c36a;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 3px #000;
+}
+
+.title {
+  width: 100%;
+  height: 16px;
+
+  font-family: Georgia, serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 16px;
+  margin-bottom: 3px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  text-shadow: 1px 2px 4px #000;
+}
+
+.artist {
+  width: 100%;
+  height: 12px;
+
+  color: #c9c9c9;
+  font-size: 10px;
+  line-height: 12px;
+  margin-bottom: 6px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* PROGRESS */
+
+.progress-area {
+  width: 100%;
+  max-width: 145px;
+  overflow: hidden;
+}
+
+.progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,.18);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #e9c36a;
+  border-radius: 20px;
+  transition: width .8s linear;
+  box-shadow: 0 0 7px rgba(255,221,140,.6);
+}
+
+.progress-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+
+  color: #c9ad6a;
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* UP NEXT - RUANG TETAP */
+
+.upnext {
+  width: 100%;
+  height: 264px;
+  min-height: 264px;
+  max-height: 264px;
+
+  min-width: 0;
+  overflow: hidden;
+
+  padding: 1px 2px 2px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.upnext-label {
+  flex-shrink: 0;
+
+  height: 17px;
+  min-height: 17px;
+
+  color: #e9c36a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 5px;
+}
+
+#songs {
+  width: 100%;
+  min-width: 0;
+  height: 240px;
+  max-height: 240px;
+  overflow: hidden;
+}
+
+/* BINGKAI LAGU - UKURAN TETAP */
+
+.song {
+  position: relative;
+  isolation: isolate;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+
+  overflow: hidden;
+
+  padding: 5px;
+  margin-bottom: 6px;
+
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(233,195,106,.22);
+  border-radius: 9px;
+
+  box-shadow:
+    0 0 5px rgba(233,195,106,.08),
+    0 2px 7px rgba(0,0,0,.25);
+}
+
+.song:last-child {
+  margin-bottom: 0;
+}
+
+/* CAHAYA BERPUTAR PADA BINGKAI LAGU */
+
+.song::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+
+  background: conic-gradient(
+    from var(--song-angle),
+    transparent 0deg,
+    rgba(184,134,50,.15) 40deg,
+    #b88632 65deg,
+    #ffe9a8 85deg,
+    #ffffff 95deg,
+    #e9c36a 110deg,
+    rgba(184,134,50,.15) 145deg,
+    transparent 180deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+  z-index: 2;
+
+  animation: songOrbit 2.4s linear infinite;
+}
+
+.song::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  box-shadow:
+    inset 0 0 5px rgba(233,195,106,.12),
+    0 0 5px rgba(233,195,106,.12);
+
+  pointer-events: none;
+  z-index: 0;
+
+  animation: songGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes songOrbit {
+  from { --song-angle: 360deg; }
+  to { --song-angle: 0deg; }
+}
+
+@keyframes songGlow {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 3px rgba(233,195,106,.08),
+      0 0 3px rgba(233,195,106,.08);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 7px rgba(255,231,165,.18),
+      0 0 8px rgba(233,195,106,.25);
+  }
+}
+
+/* ISI KARTU LAGU */
+
+.song > .number,
+.song > .song-info {
+  position: relative;
+  z-index: 1;
+}
+
+.number {
+  width: 17px;
+  min-width: 17px;
+  max-width: 17px;
+  flex-shrink: 0;
+
+  color: #d9b75f;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  text-align: center;
+}
+
+.song-info {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.song-title {
+  display: block;
+
+  width: 100%;
+  height: 14px;
+  line-height: 14px;
+
+  font-size: 10px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+
+  width: 100%;
+  height: 11px;
+  min-width: 0;
+  overflow: hidden;
+
+  margin-top: 2px;
+}
+
+.song-artist {
+  flex: 1;
+  min-width: 0;
+
+  color: #aaa;
+  font-size: 9px;
+  line-height: 11px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-duration {
+  flex-shrink: 0;
+
+  color: #d9b75f;
+  font-size: 9px;
+  line-height: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  color: #aaa;
+  font-size: 10px;
+  padding: 6px 2px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.footer {
+  display: none;
+}
+</style>
 </head>
+
 <body>
-    <div class="music-card">
-        <div class="header-title">🎵 NOW PLAYING</div>
-        <div class="now-playing">
-            <img id="art" class="album-art" src="" alt="">
-            <div>
-                <p id="title" class="track-title">Memuat Musik...</p>
-                <p id="artist" class="track-artist">Menunggu pemutar...</p>
-            </div>
+
+<div class="panel">
+
+  <div class="lightning one"></div>
+  <div class="lightning two"></div>
+  <div class="lightning three"></div>
+
+  <!-- NOW PLAYING -->
+  <div class="now">
+    <img id="cover" class="cover" src="" alt="">
+
+    <div class="track-info">
+      <div class="now-label">NOW PLAYING</div>
+      <div class="title" id="currentTitle">Memuat lagu...</div>
+      <div class="artist" id="currentArtist">YouTube Music</div>
+
+      <div class="progress-area">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
         </div>
-        <div class="up-next">Up Next:</div>
-        <div id="upnext" class="up-next-track">-</div>
+
+        <div class="progress-time">
+          <span id="elapsed">00:00</span>
+          <span id="remaining">-00:00</span>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        function updateWidget() {
-            // Mengambil file status lokal yang diperbarui Python tiap detik tanpa kendala WebSocket
-            fetch('current_song.json?t=' + new Date().getTime())
-                .then(response => response.json())
-                .then(data => {
-                    const player = data.player || {};
-                    if (player.trackTitle) {
-                        document.getElementById("title").textContent = player.trackTitle;
-                        document.getElementById("artist").textContent = player.trackArtist || "";
-                        if (player.trackCoverUrl) {
-                            document.getElementById("art").src = player.trackCoverUrl;
-                        }
-                    }
+  <!-- UP NEXT -->
+  <div class="upnext">
+    <div class="upnext-label">UP NEXT</div>
 
-                    const queue = data.queue;
-                    if (queue && queue.length > 0) {
-                        const next = queue[0];
-                        document.getElementById("upnext").textContent = `${next.title || ""} - ${next.artist || ""}`;
-                    } else {
-                        document.getElementById("upnext").textContent = "Tidak ada antrean berikutnya";
-                    }
-                })
-                .catch(err => {
-                    // Abaikan jika file sedang ditulis
-                });
-        }
+    <div id="songs">
+      <div class="status">Memuat antrean lagu...</div>
+    </div>
+  </div>
 
-        // Perbarui tampilan setiap 1 detik secara mulus tanpa putus-putus
-        setInterval(updateWidget, 1000);
-        updateWidget();
-    </script>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let currentProgress = 0;
+let currentDuration = 0;
+let progressUpdatedAt = 0;
+
+function text(el, value) {
+  el.textContent = value || "-";
+}
+
+function formatTime(seconds) {
+  seconds = Math.max(0, Math.floor(seconds));
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return String(minutes).padStart(2, "0") + ":" +
+         String(remainingSeconds).padStart(2, "0");
+}
+
+function formatQueueDuration(value) {
+  if (value === undefined || value === null || value === "") {
+    return "--:--";
+  }
+
+  if (typeof value === "string" && value.includes(":")) {
+    const parts = value.split(":").map(Number);
+
+    if (parts.every(Number.isFinite)) {
+      return parts.map(part => String(part).padStart(2, "0")).join(":");
+    }
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number < 0) {
+    return "--:--";
+  }
+
+  if (number >= 60) return formatTime(number);
+
+  const minutes = Math.floor(number);
+  const seconds = Math.round((number - minutes) * 100);
+
+  if (seconds >= 60) return "--:--";
+
+  return String(minutes).padStart(2, "0") + ":" +
+         String(seconds).padStart(2, "0");
+}
+
+function updateProgress() {
+  if (!currentDuration) return;
+
+  const elapsedSeconds = Math.min(
+    currentProgress + (Date.now() - progressUpdatedAt) / 1000,
+    currentDuration
+  );
+
+  const remainingSeconds = Math.max(
+    0,
+    currentDuration - elapsedSeconds
+  );
+
+  const percentage = Math.min(
+    100,
+    (elapsedSeconds / currentDuration) * 100
+  );
+
+  $("progressFill").style.width = percentage + "%";
+  $("elapsed").textContent = formatTime(elapsedSeconds);
+  $("remaining").textContent = "-" + formatTime(remainingSeconds);
+}
+
+async function refresh() {
+  try {
+    const response = await fetch("/data", {
+      cache: "no-store"
+    });
+
+    if (!response.ok) throw new Error("API error");
+
+    const state = await response.json();
+
+    const video = state.video;
+    const player = state.player;
+    const queue = player?.queue;
+
+    if (video) {
+      text($("currentTitle"), video.title);
+      text($("currentArtist"), video.author);
+
+      const thumb = video.thumbnails?.[0]?.url;
+
+      if (thumb && $("cover").src !== thumb) {
+        $("cover").src = thumb;
+      }
+
+      currentProgress = Number(player?.videoProgress) || 0;
+      currentDuration = Number(video.durationSeconds) || 0;
+      progressUpdatedAt = Date.now();
+
+      updateProgress();
+    }
+
+    const items = queue?.items || [];
+    const automix = queue?.automixItems || [];
+
+    let selected = Number.isInteger(queue?.selectedItemIndex)
+      ? queue.selectedItemIndex
+      : items.findIndex(song => song.selected);
+
+    let regularNext = selected >= 0
+      ? items.slice(selected + 1)
+      : items.filter(song => !song.selected);
+
+    const upcoming = [...regularNext, ...automix].slice(0, 5);
+
+    const container = $("songs");
+    container.replaceChildren();
+
+    if (upcoming.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "status";
+      empty.textContent = "Menunggu lagu berikutnya...";
+      container.appendChild(empty);
+    }
+
+    upcoming.forEach((song, index) => {
+      const row = document.createElement("div");
+      row.className = "song";
+
+      const number = document.createElement("div");
+      number.className = "number";
+      number.textContent = String(index + 1).padStart(2, "0");
+
+      const info = document.createElement("div");
+      info.className = "song-info";
+
+      const title = document.createElement("div");
+      title.className = "song-title";
+      title.textContent = song.title || "Tanpa judul";
+
+      const meta = document.createElement("div");
+      meta.className = "song-meta";
+
+      const artist = document.createElement("div");
+      artist.className = "song-artist";
+      artist.textContent = song.author || "Artis tidak diketahui";
+
+      const duration = document.createElement("div");
+      duration.className = "song-duration";
+      duration.textContent = formatQueueDuration(song.duration);
+
+      meta.append(artist, duration);
+      info.append(title, meta);
+      row.append(number, info);
+      container.appendChild(row);
+    });
+
+  } catch (error) {
+    text($("currentTitle"), "Koneksi terputus");
+    text($("currentArtist"), "Periksa YTMDesktop");
+  }
+}
+
+refresh();
+setInterval(refresh, 5000);
+setInterval(updateProgress, 1000);
+</script>
+
 </body>
 </html>
