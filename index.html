@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadi YTMD Live Widget</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 10px;
+            width: 100%;
+            background: transparent;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        .music-card {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(30, 30, 30, 0.85);
+            border: 2px solid rgba(254, 44, 85, 0.8); /* Tema khas TikTok / YTMD */
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+        .header-title {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            color: #25f4ee;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 12px;
+        }
+        .album-art {
+            width: 55px;
+            height: 55px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #444;
+            flex-shrink: 0;
+        }
+        .track-info {
+            overflow: hidden;
+        }
+        .track-title {
+            font-size: 15px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0 0 4px 0;
+            color: #fff;
+        }
+        .track-artist {
+            font-size: 13px;
+            color: #bbb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+        }
+        .up-next-section {
+            font-size: 11px;
+            color: #aaa;
+        }
+        .up-next-title {
+            font-size: 11px;
+            color: #ffaa00;
+            margin-bottom: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .up-next-track {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 12px;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="music-card">
+        <div class="header-title">🎵 NOW PLAYING</div>
+        
+        <div class="now-playing">
+            <img id="art" class="album-art" src="" alt="Art">
+            <div class="track-info">
+                <p id="title" class="track-title">Menunggu Musik...</p>
+                <p id="artist" class="track-artist">IndoFinity Bridge</p>
+            </div>
+        </div>
+
+        <div class="up-next-section">
+            <div class="up-next-title">Up Next:</div>
+            <div id="upnext" class="up-next-track">-</div>
+        </div>
+    </div>
+
+    <script>
+        // Sesuaikan dengan port/endpoint WebSocket IndoFinity Anda jika diperlukan
+        const wsUri = "ws://127.0.0.1:9863/api/v1"; // atau endpoint bawaan IndoFinity
+        let websocket;
+
+        function initWebSocket() {
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function(evt) { console.log("CONNECTED"); };
+            websocket.onclose = function(evt) { 
+                setTimeout(initWebSocket, 2000); // Coba reconnect otomatis jika putus
+            };
+            websocket.onmessage = function(evt) {
+                try {
+                    const data = JSON.parse(evt.data);
+                    updateWidget(data);
+                } catch (e) {
+                    console.error("Gagal parse data:", e);
+                }
+            };
+        }
+
+        function updateWidget(data) {
+            // Menyesuaikan struktur data dari YouTube Music / IndoFinity
+            if (data.player) {
+                document.getElementById("title").textContent = data.player.trackTitle || "Tidak diketahui";
+                document.getElementById("artist").textContent = data.player.trackArtist || "Artis tidak diketahui";
+                
+                if (data.player.trackCoverUrl) {
+                    document.getElementById("art").src = data.player.trackCoverUrl;
+                }
+            }
+
+            if (data.queue && data.queue.length > 0) {
+                const nextSong = data.queue[0];
+                document.getElementById("upnext").textContent = `${nextSong.title} - ${nextSong.artist}`;
+            } else {
+                document.getElementById("upnext").textContent = "Tidak ada antrean berikutnya";
+            }
+        }
+
+        window.addEventListener("load", initWebSocket, false);
+    </script>
+
+</body>
+</html>
