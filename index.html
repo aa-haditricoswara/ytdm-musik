@@ -99,8 +99,8 @@
         <div class="now-playing">
             <img id="art" class="album-art" src="" alt="Art">
             <div class="track-info">
-                <p id="title" class="track-title">Memuat Musik...</p>
-                <p id="artist" class="track-artist">Menunggu Pemutar...</p>
+                <p id="title" class="track-title">Menghubungkan...</p>
+                <p id="artist" class="track-artist">Menunggu sinyal musik...</p>
             </div>
         </div>
 
@@ -113,61 +113,53 @@
     <script>
         const wsUri = "ws://127.0.0.1:8766";
         let websocket;
-        let isConnected = false;
 
         function connect() {
-            try {
-                websocket = new WebSocket(wsUri);
-                
-                websocket.onopen = function() {
-                    isConnected = true;
-                    document.getElementById("artist").textContent = "Terhubung ke Jembatan";
-                };
+            websocket = new WebSocket(wsUri);
 
-                websocket.onmessage = function(event) {
-                    try {
-                        const data = JSON.parse(event.data);
-                        updateWidget(data);
-                    } catch (e) {
-                        console.error("Format data salah:", e);
+            websocket.onopen = function() {
+                console.log("Terhubung ke jembatan lokal");
+            };
+
+            websocket.onmessage = function(event) {
+                try {
+                    const response = JSON.parse(event.data);
+                    
+                    // Menangkap struktur data dari python (baik event song_update atau player langsung)
+                    const player = response.player || response.data || response;
+                    
+                    const title = player.trackTitle || player.title;
+                    const artist = player.trackArtist || player.artist;
+                    const cover = player.trackCoverUrl || player.thumbnail;
+
+                    if (title) {
+                        document.getElementById("title").textContent = title;
+                        document.getElementById("artist").textContent = artist || "Artis tidak diketahui";
+                        if (cover) {
+                            document.getElementById("art").src = cover;
+                        }
                     }
-                };
 
-                websocket.onclose = function() {
-                    isConnected = false;
-                    document.getElementById("artist").textContent = "Menghubungkan ulang...";
-                    setTimeout(connect, 3000);
-                };
+                    // Menangkap antrean Up Next
+                    const queue = response.queue;
+                    if (queue && queue.length > 0) {
+                        const next = queue[0];
+                        document.getElementById("upnext").textContent = `${next.title || ""} - ${next.artist || ""}`;
+                    } else {
+                        document.getElementById("upnext").textContent = "Tidak ada antrean berikutnya";
+                    }
+                } catch (e) {
+                    console.error("Gagal membaca pesan:", e);
+                }
+            };
 
-                websocket.onerror = function() {
-                    isConnected = false;
-                };
-            } catch (err) {
-                setTimeout(connect, 3000);
-            }
-        }
+            websocket.onclose = function() {
+                setTimeout(connect, 3000); // Sambung ulang otomatis dalam 3 detik jika terputus
+            };
 
-        function updateWidget(data) {
-            // Menangkap berbagai kemungkinan struktur data dari Python
-            const track = data.player || data.current || data;
-            
-            const title = track.trackTitle || track.title || track.song || "Tidak diketahui";
-            const artist = track.trackArtist || track.artist || "Artis tidak diketahui";
-            const cover = track.trackCoverUrl || track.coverUrl || track.image || "";
-
-            document.getElementById("title").textContent = title;
-            document.getElementById("artist").textContent = artist;
-            if (cover) {
-                document.getElementById("art").src = cover;
-            }
-
-            const queue = data.queue || data.playlist;
-            if (queue && queue.length > 0) {
-                const next = queue[0];
-                document.getElementById("upnext").textContent = `${next.title || next.trackTitle || ""} - ${next.artist || next.trackArtist || ""}`;
-            } else {
-                document.getElementById("upnext").textContent = "Tidak ada antrean berikutnya";
-            }
+            websocket.onerror = function() {
+                websocket.close();
+            };
         }
 
         connect();
