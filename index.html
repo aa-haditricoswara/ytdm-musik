@@ -681,7 +681,7 @@ function updateProgress() {
 
 async function refresh() {
   try {
-    const response = await fetch("/data", {
+    const response = await fetch("http://127.0.0.1:8765/data", {
       cache: "no-store"
     });
 
