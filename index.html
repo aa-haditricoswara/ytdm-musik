@@ -37,7 +37,7 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* PANEL UTAMA */
+/* PANEL UTAMA - UKURAN TETAP */
 
 .panel {
   position: relative;
@@ -208,7 +208,7 @@ body {
   flex-shrink: 0;
 }
 
-/* NOW PLAYING */
+/* NOW PLAYING - UKURAN TETAP */
 
 .now {
   display: flex;
@@ -216,9 +216,9 @@ body {
   gap: 7px;
 
   width: 100%;
-  height: 72px;
-  min-height: 72px;
-  max-height: 72px;
+  height: 62px;
+  min-height: 62px;
+  max-height: 62px;
 
   overflow: hidden;
 
@@ -256,7 +256,7 @@ body {
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1px;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -268,10 +268,10 @@ body {
   height: 16px;
 
   font-family: Georgia, serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   line-height: 16px;
-  margin-bottom: 1px;
+  margin-bottom: 3px;
 
   white-space: nowrap;
   overflow: hidden;
@@ -285,9 +285,9 @@ body {
   height: 12px;
 
   color: #c9c9c9;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 
   white-space: nowrap;
   overflow: hidden;
@@ -298,9 +298,8 @@ body {
 
 .progress-area {
   width: 100%;
-  max-width: none;
-  min-width: 0;
-  overflow: visible;
+  max-width: 145px;
+  overflow: hidden;
 }
 
 .progress-track {
@@ -323,25 +322,20 @@ body {
 .progress-time {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-
-  width: 100%;
   margin-top: 4px;
 
   color: #c9ad6a;
   font-size: 8px;
-  line-height: 11px;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
-/* UP NEXT - TETAP */
+/* UP NEXT - RUANG TETAP */
 
 .upnext {
   width: 100%;
-  height: 254px;
-  min-height: 254px;
-  max-height: 254px;
+  height: 264px;
+  min-height: 264px;
+  max-height: 264px;
 
   min-width: 0;
   overflow: hidden;
@@ -373,7 +367,7 @@ body {
   overflow: hidden;
 }
 
-/* BINGKAI LAGU */
+/* BINGKAI LAGU - UKURAN TETAP */
 
 .song {
   position: relative;
@@ -406,7 +400,7 @@ body {
   margin-bottom: 0;
 }
 
-/* CAHAYA BERPUTAR */
+/* CAHAYA BERPUTAR PADA BINGKAI LAGU */
 
 .song::before {
   content: "";
