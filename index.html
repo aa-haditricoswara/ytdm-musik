@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -37,40 +37,29 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* PANEL UTAMA - UKURAN TETAP */
-
 .panel {
   position: relative;
   isolation: isolate;
-
   width: 210px;
   height: 350px;
   min-width: 210px;
   max-width: 210px;
   min-height: 350px;
   max-height: 350px;
-
   overflow: hidden;
-
   background: rgba(16, 15, 13, .97);
   border: 1px solid rgba(233,195,106,.65);
   border-radius: 12px;
-
   padding: 7px;
-
   display: flex;
   flex-direction: column;
   gap: 6px;
-
   box-shadow:
     0 0 7px rgba(233,195,106,.3),
     0 0 16px rgba(233,195,106,.15),
     0 4px 15px rgba(0,0,0,.5);
-
   animation: frameGlow 4.5s ease-in-out infinite;
 }
-
-/* CAHAYA PANEL */
 
 .panel::before {
   content: "";
@@ -78,7 +67,6 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 2px;
-
   background: conic-gradient(
     from var(--panel-angle),
     transparent 0deg,
@@ -91,20 +79,15 @@ body {
     transparent 180deg,
     transparent 360deg
   );
-
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-
   pointer-events: none;
   z-index: 5;
-
   animation: panelOrbit 4.2s linear infinite;
 }
-
-/* KILATAN CAHAYA */
 
 .lightning {
   position: absolute;
@@ -112,10 +95,8 @@ body {
   bottom: -60%;
   width: 65%;
   left: -90%;
-
   pointer-events: none;
   z-index: 0;
-
   background: linear-gradient(
     110deg,
     transparent 0%,
@@ -126,48 +107,21 @@ body {
     rgba(255,255,255,0) 63%,
     transparent 100%
   );
-
   filter: blur(2px);
   opacity: 0;
-
   animation: lightningSweep 6.8s ease-in-out infinite;
 }
 
-.lightning.one {
-  animation-delay: 0s;
-}
-
-.lightning.two {
-  animation-delay: .65s;
-}
-
-.lightning.three {
-  animation-delay: 1.3s;
-}
+.lightning.one { animation-delay: 0s; }
+.lightning.two { animation-delay: .65s; }
+.lightning.three { animation-delay: 1.3s; }
 
 @keyframes lightningSweep {
-  0%, 5% {
-    left: -90%;
-    opacity: 0;
-  }
-
-  12% {
-    opacity: .9;
-  }
-
-  35% {
-    opacity: .65;
-  }
-
-  48% {
-    left: 120%;
-    opacity: 0;
-  }
-
-  100% {
-    left: 120%;
-    opacity: 0;
-  }
+  0%, 5% { left: -90%; opacity: 0; }
+  12% { opacity: .9; }
+  35% { opacity: .65; }
+  48% { left: 120%; opacity: 0; }
+  100% { left: 120%; opacity: 0; }
 }
 
 @keyframes panelOrbit {
@@ -182,7 +136,6 @@ body {
       0 0 13px rgba(233,195,106,.12),
       0 4px 15px rgba(0,0,0,.5);
   }
-
   45% {
     box-shadow:
       0 0 9px rgba(255,231,165,.65),
@@ -190,7 +143,6 @@ body {
       0 0 32px rgba(255,255,255,.08),
       0 4px 15px rgba(0,0,0,.5);
   }
-
   55% {
     box-shadow:
       0 0 6px rgba(255,255,255,.45),
@@ -199,8 +151,6 @@ body {
   }
 }
 
-/* ISI PANEL */
-
 .panel > .now,
 .panel > .upnext {
   position: relative;
@@ -208,20 +158,15 @@ body {
   flex-shrink: 0;
 }
 
-/* NOW PLAYING - UKURAN TETAP */
-
 .now {
   display: flex;
   align-items: center;
   gap: 7px;
-
   width: 100%;
   height: 62px;
   min-height: 62px;
   max-height: 62px;
-
   overflow: hidden;
-
   padding: 2px 2px 7px;
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
@@ -232,11 +177,9 @@ body {
   min-width: 48px;
   max-width: 48px;
   flex-shrink: 0;
-
   border-radius: 9px;
   object-fit: cover;
   background: #333;
-
   box-shadow:
     0 0 5px rgba(233,195,106,.25),
     0 2px 8px rgba(0,0,0,.5);
@@ -266,35 +209,28 @@ body {
 .title {
   width: 100%;
   height: 16px;
-
   font-family: Georgia, serif;
   font-size: 13px;
   font-weight: bold;
   line-height: 16px;
   margin-bottom: 3px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
   text-shadow: 1px 2px 4px #000;
 }
 
 .artist {
   width: 100%;
   height: 12px;
-
   color: #c9c9c9;
   font-size: 10px;
   line-height: 12px;
   margin-bottom: 6px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* PROGRESS */
 
 .progress-area {
   width: 100%;
@@ -323,35 +259,27 @@ body {
   display: flex;
   justify-content: space-between;
   margin-top: 4px;
-
   color: #c9ad6a;
   font-size: 8px;
   font-variant-numeric: tabular-nums;
 }
-
-/* UP NEXT - RUANG TETAP */
 
 .upnext {
   width: 100%;
   height: 264px;
   min-height: 264px;
   max-height: 264px;
-
   min-width: 0;
   overflow: hidden;
-
   padding: 1px 2px 2px;
-
   display: flex;
   flex-direction: column;
 }
 
 .upnext-label {
   flex-shrink: 0;
-
   height: 17px;
   min-height: 17px;
-
   color: #e9c36a;
   font-size: 10px;
   font-weight: 800;
@@ -367,40 +295,28 @@ body {
   overflow: hidden;
 }
 
-/* BINGKAI LAGU - UKURAN TETAP */
-
 .song {
   position: relative;
   isolation: isolate;
-
   display: flex;
   align-items: center;
   gap: 5px;
-
   width: 100%;
   height: 42px;
   min-height: 42px;
   max-height: 42px;
-
   overflow: hidden;
-
   padding: 5px;
   margin-bottom: 6px;
-
   background: rgba(255,255,255,.055);
   border: 1px solid rgba(233,195,106,.22);
   border-radius: 9px;
-
   box-shadow:
     0 0 5px rgba(233,195,106,.08),
     0 2px 7px rgba(0,0,0,.25);
 }
 
-.song:last-child {
-  margin-bottom: 0;
-}
-
-/* CAHAYA BERPUTAR PADA BINGKAI LAGU */
+.song:last-child { margin-bottom: 0; }
 
 .song::before {
   content: "";
@@ -408,7 +324,6 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-
   background: conic-gradient(
     from var(--song-angle),
     transparent 0deg,
@@ -421,16 +336,13 @@ body {
     transparent 180deg,
     transparent 360deg
   );
-
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-
   pointer-events: none;
   z-index: 2;
-
   animation: songOrbit 2.4s linear infinite;
 }
 
@@ -439,14 +351,11 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-
   box-shadow:
     inset 0 0 5px rgba(233,195,106,.12),
     0 0 5px rgba(233,195,106,.12);
-
   pointer-events: none;
   z-index: 0;
-
   animation: songGlow 2.4s ease-in-out infinite;
 }
 
@@ -461,15 +370,12 @@ body {
       inset 0 0 3px rgba(233,195,106,.08),
       0 0 3px rgba(233,195,106,.08);
   }
-
   50% {
     box-shadow:
       inset 0 0 7px rgba(255,231,165,.18),
       0 0 8px rgba(233,195,106,.25);
   }
 }
-
-/* ISI KARTU LAGU */
 
 .song > .number,
 .song > .song-info {
@@ -482,7 +388,6 @@ body {
   min-width: 17px;
   max-width: 17px;
   flex-shrink: 0;
-
   color: #d9b75f;
   font-family: Georgia, serif;
   font-size: 11px;
@@ -499,14 +404,11 @@ body {
 
 .song-title {
   display: block;
-
   width: 100%;
   height: 14px;
   line-height: 14px;
-
   font-size: 10px;
   font-weight: 600;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -517,23 +419,19 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-
   width: 100%;
   height: 11px;
   min-width: 0;
   overflow: hidden;
-
   margin-top: 2px;
 }
 
 .song-artist {
   flex: 1;
   min-width: 0;
-
   color: #aaa;
   font-size: 9px;
   line-height: 11px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -541,7 +439,6 @@ body {
 
 .song-duration {
   flex-shrink: 0;
-
   color: #d9b75f;
   font-size: 9px;
   line-height: 11px;
@@ -552,7 +449,6 @@ body {
   color: #aaa;
   font-size: 10px;
   padding: 6px 2px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -572,7 +468,6 @@ body {
   <div class="lightning two"></div>
   <div class="lightning three"></div>
 
-  <!-- NOW PLAYING -->
   <div class="now">
     <img id="cover" class="cover" src="" alt="">
 
@@ -594,7 +489,6 @@ body {
     </div>
   </div>
 
-  <!-- UP NEXT -->
   <div class="upnext">
     <div class="upnext-label">UP NEXT</div>
 
@@ -681,11 +575,13 @@ function updateProgress() {
 
 async function refresh() {
   try {
-    const response = await fetch("/data", {
+    const response = await fetch("http://127.0.0.1:8765/data", {
       cache: "no-store"
     });
 
-    if (!response.ok) throw new Error("API error");
+    if (!response.ok) {
+      throw new Error("API error: " + response.status);
+    }
 
     const state = await response.json();
 
@@ -766,6 +662,7 @@ async function refresh() {
     });
 
   } catch (error) {
+    console.error("UP NEXT ERROR:", error);
     text($("currentTitle"), "Koneksi terputus");
     text($("currentArtist"), "Periksa YTMDesktop");
   }
@@ -778,3 +675,4 @@ setInterval(updateProgress, 1000);
 
 </body>
 </html>
+```
